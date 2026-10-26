@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alamirbit - توثيق الحساب الآمن (KYC)</title>
+    <title>Alamirbit - توثيق الكاميرا المباشرة</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { font-family: Tahoma, sans-serif; background-color: #f4f6f9; margin: 0; padding: 15px; color: #333; }
@@ -15,16 +15,21 @@
         label { display: block; margin-bottom: 6px; font-weight: bold; font-size: 14px; }
         input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
         
-        /* تصميم زر رفع الصور الاحترافي */
-        .file-upload-btn { display: block; width: 100%; background: #e7f3ff; color: #0088cc; border: 2px dashed #0088cc; padding: 12px; border-radius: 8px; text-align: center; font-weight: bold; cursor: pointer; box-sizing: border-box; }
-        .file-upload-btn:hover { background: #d0e8ff; }
-        input[type="file"] { display: none; }
+        .cam-btn { width: 100%; background: #0088cc; color: white; border: none; padding: 14px; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 5px; text-align: center; }
+        .cam-btn:hover { background: #006699; }
         
-        .preview-text { font-size: 12px; color: #28a745; margin-top: 5px; font-weight: bold; display: none; }
-        .note { font-size: 11px; color: #d9534f; margin-top: 4px; font-weight: bold; }
+        /* نافذة بث الكاميرا الحية */
+        #camera-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; text-align: center; padding-top: 30px; box-sizing: border-box; }
+        video { width: 92%; max-width: 400px; height: 60vh; object-fit: cover; border-radius: 12px; border: 2px solid #fff; }
+        canvas { display: none; }
+        .capture-action-btn { background: #28a745; color: white; border: none; padding: 14px 30px; border-radius: 30px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px; box-shadow: 0 4px 10px rgba(40,167,69,0.4); }
+        .close-cam-btn { background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; cursor: pointer; margin-top: 15px; }
         
+        .preview-box { margin-top: 8px; text-align: center; display: none; }
+        .preview-img { width: 100%; max-height: 140px; object-fit: contain; border-radius: 6px; border: 1px solid #ddd; }
+        .success-text { color: #28a745; font-size: 13px; font-weight: bold; margin-top: 4px; }
+
         .submit-btn { width: 100%; background: #28a745; color: white; border: none; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px; }
-        .submit-btn:hover { background: #218838; }
         
         #review-section { display: none; }
         .summary-box { background: #f8f9fa; border: 1px solid #e1e8ed; padding: 15px; border-radius: 8px; font-size: 14px; line-height: 1.8; margin-bottom: 15px; }
@@ -34,14 +39,14 @@
 
 <div class="container">
     <h2>Alamirbit KYC</h2>
-    <div class="subtitle">بوابة التحقق وتوثيق الحسابات الرسمية</div>
+    <div class="subtitle">بوابة التحقق عبر الكاميرا الحية المباشرة</div>
     
-    <!-- نموذج الإدخال -->
+    <!-- النموذج الأساسي -->
     <div id="form-section">
         <div class="section-title">1️⃣ المعلومات الشخصية الأساسية</div>
         <div class="form-group">
             <label>الاسم الرباعي الكامل</label>
-            <input type="text" id="fullname" placeholder="أدخل الاسم الرباعي كما هو في الهوية">
+            <input type="text" id="fullname" placeholder="الاسم الرباعي كما في الهوية">
         </div>
         <div class="form-group">
             <label>رقم الهاتف</label>
@@ -52,7 +57,7 @@
             <input type="text" id="address" placeholder="الدولة، المدينة، الشارع">
         </div>
 
-        <div class="section-title">2️⃣ توثيق وثيقة الإثبات</div>
+        <div class="section-title">2️⃣ توثيق وثيقة الهوية (الكاميرا الخلفية)</div>
         <div class="form-group">
             <label>نوع وثيقة الإثبات</label>
             <select id="id_type">
@@ -63,20 +68,22 @@
         </div>
         
         <div class="form-group">
-            <label>📸 تصوير وثيقة الهوية</label>
-            <label for="id_image" class="file-upload-btn">📷 اضغط للتصوير بالكاميرا أو اختيار الهوية</label>
-            <input type="file" id="id_image" accept="image/*" capture="environment" onchange="fileSelected('id_image', 'id_success')">
-            <div id="id_success" class="preview-text">✅ تم اختيار/تصوير وثيقة الهوية بنجاح</div>
-            <div class="note">⚠️ يرجى التأكد من وضوح تفاصيل الهوية</div>
+            <label>📸 تصوير الهوية المباشر</label>
+            <button type="button" class="cam-btn" onclick="openLiveCamera('environment', 'id')">📷 فتح الكاميرا لتصوير الهوية</button>
+            <div id="id_preview_box" class="preview-box">
+                <img id="id_preview" class="preview-img">
+                <div class="success-text">✅ تم التقاط صورة الهوية بنجاح</div>
+            </div>
         </div>
 
-        <div class="section-title">3️⃣ الصورة الشخصية (سيلفي)</div>
+        <div class="section-title">3️⃣ الصورة الشخصية (سيلفي - الكاميرا الأمامية)</div>
         <div class="form-group">
-            <label>🤳 التقاط صورة سيلفي للوجه</label>
-            <label for="selfie_image" class="file-upload-btn">🤳 اضغط لالتقاط السيلفي بالكاميرا الأمامية</label>
-            <input type="file" id="selfie_image" accept="image/*" capture="user" onchange="fileSelected('selfie_image', 'selfie_success')">
-            <div id="selfie_success" class="preview-text">✅ تم التقاط صورة السيلفي بنجاح</div>
-            <div class="note">⚠️ يرجى التقاط صورة واضحة ومباشرة لوجهك</div>
+            <label>🤳 التقاط صورة سيلفي مباشرة</label>
+            <button type="button" class="cam-btn" onclick="openLiveCamera('user', 'selfie')">🤳 فتح الكاميرا الأمامية للسيلفي</button>
+            <div id="selfie_preview_box" class="preview-box">
+                <img id="selfie_preview" class="preview-img">
+                <div class="success-text">✅ تم التقاط السيلفي بنجاح</div>
+            </div>
         </div>
 
         <div class="form-group" style="margin-top: 15px;">
@@ -89,6 +96,14 @@
         </div>
 
         <button class="submit-btn" onclick="showReview()">مراجعة البيانات قبل الإرسال 📋</button>
+    </div>
+
+    <!-- واجهة الكاميرا الحية المنبثقة -->
+    <div id="camera-modal">
+        <video id="videoElement" autoplay playsinline></video><br>
+        <button type="button" class="capture-action-btn" onclick="capturePhoto()">التقاط الصورة 📸</button><br>
+        <button type="button" class="close-cam-btn" onclick="closeLiveCamera()">إلغاء ❌</button>
+        <canvas id="canvasElement"></canvas>
     </div>
 
     <!-- قسم مراجعة البيانات النهائية -->
@@ -104,12 +119,59 @@
     let tg = window.Telegram.WebApp;
     tg.expand();
 
-    function fileSelected(inputId, successId) {
-        let input = document.getElementById(inputId);
-        let successDiv = document.getElementById(successId);
-        if (input.files && input.files[0]) {
-            successDiv.style.display = 'block';
+    let activeCameraMode = '';
+    let mediaStreamRef = null;
+    let capturedIdData = null;
+    let capturedSelfieData = null;
+
+    async function openLiveCamera(facingChoice, modeType) {
+        activeCameraMode = modeType;
+        const modal = document.getElementById('camera-modal');
+        const video = document.getElementById('videoElement');
+        modal.style.display = 'block';
+
+        try {
+            mediaStreamRef = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: facingChoice },
+                audio: false
+            });
+            video.srcObject = mediaStreamRef;
+        } catch (err) {
+            alert("⚠️ عذراً، لم يتم العثور على صلاحية الكاميرا. يرجى السماح للمتصفح بالوصول إلى الكاميرا من إعدادات الهاتف.");
+            modal.style.display = 'none';
         }
+    }
+
+    function capturePhoto() {
+        const video = document.getElementById('videoElement');
+        const canvas = document.getElementById('canvasElement');
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 480;
+        
+        let context = canvas.getContext('2d');
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        let photoDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+        if (activeCameraMode === 'id') {
+            capturedIdData = photoDataUrl;
+            document.getElementById('id_preview').src = photoDataUrl;
+            document.getElementById('id_preview_box').style.display = 'block';
+        } else if (activeCameraMode === 'selfie') {
+            capturedSelfieData = photoDataUrl;
+            document.getElementById('selfie_preview').src = photoDataUrl;
+            document.getElementById('selfie_preview_box').style.display = 'block';
+        }
+
+        closeLiveCamera();
+    }
+
+    function closeLiveCamera() {
+        if (mediaStreamRef) {
+            let tracks = mediaStreamRef.getTracks();
+            tracks.forEach(track => track.stop());
+        }
+        document.getElementById('camera-modal').style.display = 'none';
     }
 
     let formDataCache = {};
@@ -119,8 +181,6 @@
         let phone = document.getElementById("phone").value.trim();
         let address = document.getElementById("address").value.trim();
         let idType = document.getElementById("id_type").value;
-        let idImg = document.getElementById("id_image").files[0];
-        let selfieImg = document.getElementById("selfie_image").files[0];
         let purpose = document.getElementById("purpose").value;
 
         if(!name || !phone || !address) {
@@ -128,8 +188,8 @@
             return;
         }
 
-        if(!idImg || !selfieImg) {
-            alert("⚠️ يرجى التقاط صورة الهوية وصورة السيلفي لإتمام التوثيق!");
+        if(!capturedIdData || !capturedSelfieData) {
+            alert("⚠️ يرجى التقاط صورة الهوية وصورة السيلفي بالكاميرا المباشرة أولاً!");
             return;
         }
 
@@ -140,8 +200,8 @@
             • <b>الهاتف:</b> ${phone}<br>
             • <b>العنوان:</b> ${address}<br>
             • <b>نوع الهوية:</b> ${idType}<br>
-            • <b>صورة الهوية:</b> تم الالتقاط بنجاح ✅<br>
-            • <b>صورة السيلفي:</b> تم الالتقاط بنجاح ✅<br>
+            • <b>صورة الهوية:</b> تم التقاطها بالكاميرا المباشرة ✅<br>
+            • <b>صورة السيلفي:</b> تم التقاطها بالكاميرا المباشرة ✅<br>
             • <b>الغرض:</b> ${purpose}
         `;
 
@@ -161,8 +221,8 @@
                          `• الهاتف: ${formDataCache.phone}\n` +
                          `• العنوان: ${formDataCache.address}\n` +
                          `• نوع الهوية: ${formDataCache.idType}\n` +
-                         `• صورة الهوية: مرفقة ✅\n` +
-                         `• صورة السيلفي: مرفقة ✅\n` +
+                         `• صورة الهوية: تم التقاطها بالكاميرا المباشرة ✅\n` +
+                         `• صورة السيلفي: تم التقاطها بالكاميرا المباشرة ✅\n` +
                          `• الغرض: ${formDataCache.purpose}`;
 
         tg.sendData(dataString);
