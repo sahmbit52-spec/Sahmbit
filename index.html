@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alamirbit - توثيق الحساب الشامل</title>
+    <title>Alamirbit - توثيق الحساب الآمن (KYC)</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { font-family: Tahoma, sans-serif; background-color: #f4f6f9; margin: 0; padding: 15px; color: #333; }
@@ -14,29 +14,28 @@
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 6px; font-weight: bold; font-size: 14px; }
         input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
-        input[type="file"] { padding: 8px; background: #fafafa; }
+        input[type="file"] { padding: 8px; background: #fafafa; border: 2px dashed #0088cc; cursor: pointer; }
         input:focus, select:focus { border-color: #0088cc; outline: none; }
         .submit-btn { width: 100%; background: #28a745; color: white; border: none; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px; }
         .submit-btn:hover { background: #218838; }
-        .note { font-size: 11px; color: #888; margin-top: 4px; }
+        .note { font-size: 11px; color: #d9534f; margin-top: 4px; font-weight: bold; }
         
-        /* تصميم نافذة المراجعة النهائية */
         #review-section { display: none; }
-        .summary-box { background: #f8f9fa; border: 1px solid #e1e8ed; padding: 12px; border-radius: 8px; font-size: 14px; line-height: 1.6; margin-bottom: 15px; }
+        .summary-box { background: #f8f9fa; border: 1px solid #e1e8ed; padding: 15px; border-radius: 8px; font-size: 14px; line-height: 1.8; margin-bottom: 15px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h2>Alamirbit KYC</h2>
-    <div class="subtitle">بوابة التوثيق الآمنة والمتكاملة للحسابات</div>
+    <div class="subtitle">بوابة التحقق وتوثيق الحسابات الرسمية</div>
     
-    <!-- نموذج الإدخال الأساسي -->
+    <!-- نموذج الإدخال -->
     <div id="form-section">
-        <div class="section-title">1️⃣ المعلومات الأساسية</div>
+        <div class="section-title">1️⃣ المعلومات الشخصية الأساسية</div>
         <div class="form-group">
             <label>الاسم الرباعي الكامل</label>
-            <input type="text" id="fullname" placeholder="أدخل الاسم الرباعي كما في الهوية">
+            <input type="text" id="fullname" placeholder="أدخل الاسم الرباعي كما هو في الهوية">
         </div>
         <div class="form-group">
             <label>رقم الهاتف</label>
@@ -47,7 +46,7 @@
             <input type="text" id="address" placeholder="الدولة، المدينة، الشارع">
         </div>
 
-        <div class="section-title">2️⃣ توثيق وثيقة الإثبات</div>
+        <div class="section-title">2️⃣ توثيق وثيقة الإثبات (بالكاميرا)</div>
         <div class="form-group">
             <label>نوع وثيقة الإثبات</label>
             <select id="id_type">
@@ -57,16 +56,18 @@
             </select>
         </div>
         <div class="form-group">
-            <label>صورة الهوية (الكاميرا أو الملفات)</label>
+            <label>📸 تصوير وثيقة الهوية (الوجه الأمامي)</label>
+            <!-- يفتح كاميرا الهاتف الخلفية مباشرة -->
             <input type="file" id="id_image" accept="image/*" capture="environment">
-            <div class="note">يرجى رفع صورة واضحة للوثيقة</div>
+            <div class="note">⚠️ يرجى التأكد من وضوح تفاصيل الهوية وخلوها من الانعكاسات</div>
         </div>
 
         <div class="section-title">3️⃣ الصورة الشخصية (سيلفي)</div>
         <div class="form-group">
-            <label>صورة سيلفي للوجه</label>
+            <label>🤳 التقاط صورة سيلفي للوجه</label>
+            <!-- يفتح كاميرا الهاتف الأمامية مباشرة -->
             <input type="file" id="selfie_image" accept="image/*" capture="user">
-            <div class="note">التقاط صورة واضحة ومباشرة لوجهك</div>
+            <div class="note">⚠️ يرجى التقاط صورة واضحة ومباشرة لوجهك بدون نظارات داكنة</div>
         </div>
 
         <div class="form-group" style="margin-top: 15px;">
@@ -84,13 +85,10 @@
     <!-- قسم مراجعة البيانات النهائية -->
     <div id="review-section">
         <div class="section-title">📋 مراجعة البيانات النهائية</div>
-        <div class="summary-box" id="summary-content">
-            <!-- سيتم تعبئتها برمجياً -->
-        </div>
+        <div class="summary-box" id="summary-content"></div>
         <button class="submit-btn" onclick="confirmAndSend()" style="background: #0088cc;">تأكيد وإرسال الطلب نهائياً 🚀</button>
         <button class="submit-btn" onclick="backToEdit()" style="background: #6c757d; margin-top: 10px;">تعديل البيانات ✏️</button>
     </div>
-
 </div>
 
 <script>
@@ -114,21 +112,20 @@
         }
 
         if(!idImg || !selfieImg) {
-            alert("⚠️ يرجى إرفاق صورة الهوية وصورة السيلفي الشخصية لإتمام التوثيق!");
+            alert("⚠️ يرجى التقاط صورة الهوية وصورة السيلفي بالكاميرا لإتمام التوثيق!");
             return;
         }
 
         formDataCache = { name, phone, address, idType, purpose };
 
-        // عرض الملخص للعميل
         let summaryHtml = `
-            • <b>الاسم:</b> ${name}<br>` +
-            `• <b>الهاتف:</b> ${phone}<br>` +
-            `• <b>العنوان:</b> ${address}<br>` +
-            `• <b>نوع الهوية:</b> ${idType}<br>` +
-            `• <b>صورة الهوية:</b> تم الإرفاق ✅<br>` +
-            `• <b>الصورة الشخصية:</b> تم الإرفاق ✅<br>` +
-            `• <b>الغرض:</b> ${purpose}
+            • <b>الاسم:</b> ${name}<br>
+            • <b>الهاتف:</b> ${phone}<br>
+            • <b>العنوان:</b> ${address}<br>
+            • <b>نوع الهوية:</b> ${idType}<br>
+            • <b>صورة الهوية:</b> تم الالتقاط بالكاميرا ✅<br>
+            • <b>صورة السيلفي:</b> تم الالتقاط بالكاميرا ✅<br>
+            • <b>الغرض:</b> ${purpose}
         `;
 
         document.getElementById("summary-content").innerHTML = summaryHtml;
@@ -142,17 +139,17 @@
     }
 
     function confirmAndSend() {
-        let dataString = `🛡 **طلب توثيق جديد (KYC):**\n\n` +
+        let dataString = `🛡 **طلب توثيق جديد (Alamirbit KYC):**\n\n` +
                          `• الاسم: ${formDataCache.name}\n` +
                          `• الهاتف: ${formDataCache.phone}\n` +
                          `• العنوان: ${formDataCache.address}\n` +
                          `• نوع الهوية: ${formDataCache.idType}\n` +
-                         `• صورة الهوية: مرفقة ✅\n` +
-                         `• صورة السيلفي: مرفقة ✅\n` +
+                         `• صورة الهوية: تم الالتقاط ✅\n` +
+                         `• صورة السيلفي: تم الالتقاط ✅\n` +
                          `• الغرض: ${formDataCache.purpose}`;
 
         tg.sendData(dataString);
-        alert("✅ تم إرسال طلبك بنجاح! سيتم إبلاغك بالرد من الإدارة قريباً.");
+        alert("✅ تم إرسال طلب التوثيق بنجاح! يتم الآن مراجعة بياناتك من قبل الإدارة وسيتم إشعارك بالنتيجة قريباً.");
         tg.close();
     }
 </script>
