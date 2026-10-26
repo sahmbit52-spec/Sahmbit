@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alamirbit - بوابة التوثيق</title>
+    <title>Alamirbit - بوابة التوثيق المتقدمة</title>
     <!-- مكتبة تيليجرام الرسمية للربط المصغر -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
@@ -14,9 +14,11 @@
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 6px; font-weight: bold; font-size: 14px; }
         input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+        input[type="file"] { padding: 8px; background: #fafafa; }
         input:focus, select:focus { border-color: #0088cc; outline: none; }
         .submit-btn { width: 100%; background: #0088cc; color: white; border: none; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px; }
         .submit-btn:hover { background: #006699; }
+        .note { font-size: 11px; color: #888; margin-top: 4px; }
     </style>
 </head>
 <body>
@@ -41,6 +43,27 @@
     </div>
 
     <div class="form-group">
+        <label>نوع وثيقة الإثبات</label>
+        <select id="id_type">
+            <option value="بطاقة شخصية / هوية وطنية">بطاقة شخصية / هوية وطنية</option>
+            <option value="جواز سفر">جواز سفر</option>
+            <option value="رخصة قيادة">رخصة قيادة</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>صورة وثيقة الإثبات (الهوية)</label>
+        <input type="file" id="id_image" accept="image/*">
+        <div class="note">يرجى رفع صورة واضحة ومضاءة جيداً للهوية</div>
+    </div>
+
+    <div class="form-group">
+        <label>صورة شخصية للعميل (سيلفي مع الهوية)</label>
+        <input type="file" id="selfie_image" accept="image/*">
+        <div class="note">التقاط صورة واضحة للوجه وأنت تحمل الهوية</div>
+    </div>
+
+    <div class="form-group">
         <label>الغرض من استخدام المنصة</label>
         <select id="purpose">
             <option value="الإيداع لمنصة تداول">الإيداع لمنصة تداول</option>
@@ -54,23 +77,33 @@
 
 <script>
     let tg = window.Telegram.WebApp;
-    tg.expand(); // جعل النافذة تفتح بملء الشاشة تلقائياً داخل تيليجرام
+    tg.expand(); // فتح النافذة بملء الشاشة تلقائياً داخل تيليجرام
 
     function submitData() {
         let name = document.getElementById("fullname").value.trim();
         let phone = document.getElementById("phone").value.trim();
         let address = document.getElementById("address").value.trim();
+        let idType = document.getElementById("id_type").value;
+        let idImg = document.getElementById("id_image").files[0];
+        let selfieImg = document.getElementById("selfie_image").files[0];
         let purpose = document.getElementById("purpose").value;
 
         if(!name || !phone || !address) {
-            alert("يرجى تعبئة جميع الحقول المطلوبة بدقة!");
+            alert("يرجى تعبئة الحقول الأساسية بدقة!");
             return;
         }
 
-        // تنسيق البيانات لتُرسل للبوت دفعة واحدة
-        let dataString = `• الاسم: ${name}\n• الهاتف: ${phone}\n• العنوان: ${address}\n• الغرض: ${purpose}`;
+        if(!idImg || !selfieImg) {
+            alert("يرجى إرفاق صورة الهوية وصورة السيلفي لإتمام التوثيق!");
+            return;
+        }
 
-        // إرسال البيانات للبوت وإغلاق نافذة الويب المصغرة فوراً
+        // ملاحظة: نظراً لأن بوتات تيليجرام ترسل النصوص عبر الـ WebAppData،
+        // نقوم بإرسال الملخص النصي وبيانات توثيق الهوية، ويمكنك لاحقاً استقبال الصور 
+        // أو حفظها عبر سيرفر خارجي إذا لزم الأمر، أو الاكتفاء بالتحقق المبدئي.
+        let dataString = `• الاسم: ${name}\n• الهاتف: ${phone}\n• العنوان: ${address}\n• نوع الهوية: ${idType}\n• صورة الهوية: تم الإرفاق ✅\n• صورة السيلفي: تم الإرفاق ✅\n• الغرض: ${purpose}`;
+
+        // إرسال البيانات للبوت وإغلاق نافذة الويب المصغرة
         tg.sendData(dataString);
         tg.close();
     }
