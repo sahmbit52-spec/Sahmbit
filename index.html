@@ -3,83 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alamirbit - بوابة التوثيق المتقدمة</title>
-    <!-- مكتبة تيليجرام الرسمية للربط المصغر -->
+    <title>Alamirbit - توثيق الحساب الشامل</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { font-family: Tahoma, sans-serif; background-color: #f4f6f9; margin: 0; padding: 15px; color: #333; }
         .container { max-width: 480px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         h2 { text-align: center; color: #0088cc; margin-bottom: 5px; }
         .subtitle { text-align: center; color: #666; font-size: 13px; margin-bottom: 20px; }
+        .section-title { font-size: 15px; font-weight: bold; color: #0088cc; border-bottom: 2px solid #e1e8ed; padding-bottom: 5px; margin: 20px 0 12px 0; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 6px; font-weight: bold; font-size: 14px; }
         input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
         input[type="file"] { padding: 8px; background: #fafafa; }
         input:focus, select:focus { border-color: #0088cc; outline: none; }
-        .submit-btn { width: 100%; background: #0088cc; color: white; border: none; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px; }
-        .submit-btn:hover { background: #006699; }
+        .submit-btn { width: 100%; background: #28a745; color: white; border: none; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+        .submit-btn:hover { background: #218838; }
         .note { font-size: 11px; color: #888; margin-top: 4px; }
+        
+        /* تصميم نافذة المراجعة النهائية */
+        #review-section { display: none; }
+        .summary-box { background: #f8f9fa; border: 1px solid #e1e8ed; padding: 12px; border-radius: 8px; font-size: 14px; line-height: 1.6; margin-bottom: 15px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h2>Alamirbit KYC</h2>
-    <div class="subtitle">بوابة التوثيق الآمنة للحسابات</div>
+    <div class="subtitle">بوابة التوثيق الآمنة والمتكاملة للحسابات</div>
     
-    <div class="form-group">
-        <label>الاسم الرباعي الكامل</label>
-        <input type="text" id="fullname" placeholder="أدخل الاسم الرباعي كما في الهوية">
+    <!-- نموذج الإدخال الأساسي -->
+    <div id="form-section">
+        <div class="section-title">1️⃣ المعلومات الأساسية</div>
+        <div class="form-group">
+            <label>الاسم الرباعي الكامل</label>
+            <input type="text" id="fullname" placeholder="أدخل الاسم الرباعي كما في الهوية">
+        </div>
+        <div class="form-group">
+            <label>رقم الهاتف</label>
+            <input type="tel" id="phone" placeholder="7xxxxxxxx">
+        </div>
+        <div class="form-group">
+            <label>عنوان السكن بالتفصيل</label>
+            <input type="text" id="address" placeholder="الدولة، المدينة، الشارع">
+        </div>
+
+        <div class="section-title">2️⃣ توثيق وثيقة الإثبات</div>
+        <div class="form-group">
+            <label>نوع وثيقة الإثبات</label>
+            <select id="id_type">
+                <option value="بطاقة شخصية / هوية وطنية">بطاقة شخصية / هوية وطنية</option>
+                <option value="جواز سفر">جواز سفر</option>
+                <option value="رخصة قيادة">رخصة قيادة</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>صورة الهوية (الكاميرا أو الملفات)</label>
+            <input type="file" id="id_image" accept="image/*" capture="environment">
+            <div class="note">يرجى رفع صورة واضحة للوثيقة</div>
+        </div>
+
+        <div class="section-title">3️⃣ الصورة الشخصية (سيلفي)</div>
+        <div class="form-group">
+            <label>صورة سيلفي للوجه</label>
+            <input type="file" id="selfie_image" accept="image/*" capture="user">
+            <div class="note">التقاط صورة واضحة ومباشرة لوجهك</div>
+        </div>
+
+        <div class="form-group" style="margin-top: 15px;">
+            <label>الغرض من استخدام المنصة</label>
+            <select id="purpose">
+                <option value="الإيداع لمنصة تداول">الإيداع لمنصة تداول</option>
+                <option value="شراء منتجات أو خدمات">شراء منتجات أو خدمات</option>
+                <option value="غرض شخصي">غرض شخصي</option>
+            </select>
+        </div>
+
+        <button class="submit-btn" onclick="showReview()">مراجعة البيانات قبل الإرسال 📋</button>
     </div>
 
-    <div class="form-group">
-        <label>رقم الهاتف</label>
-        <input type="tel" id="phone" placeholder="7xxxxxxxx">
+    <!-- قسم مراجعة البيانات النهائية -->
+    <div id="review-section">
+        <div class="section-title">📋 مراجعة البيانات النهائية</div>
+        <div class="summary-box" id="summary-content">
+            <!-- سيتم تعبئتها برمجياً -->
+        </div>
+        <button class="submit-btn" onclick="confirmAndSend()" style="background: #0088cc;">تأكيد وإرسال الطلب نهائياً 🚀</button>
+        <button class="submit-btn" onclick="backToEdit()" style="background: #6c757d; margin-top: 10px;">تعديل البيانات ✏️</button>
     </div>
 
-    <div class="form-group">
-        <label>عنوان السكن بالتفصيل</label>
-        <input type="text" id="address" placeholder="الدولة، المدينة، الشارع">
-    </div>
-
-    <div class="form-group">
-        <label>نوع وثيقة الإثبات</label>
-        <select id="id_type">
-            <option value="بطاقة شخصية / هوية وطنية">بطاقة شخصية / هوية وطنية</option>
-            <option value="جواز سفر">جواز سفر</option>
-            <option value="رخصة قيادة">رخصة قيادة</option>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label>صورة وثيقة الإثبات (الهوية)</label>
-        <input type="file" id="id_image" accept="image/*">
-        <div class="note">يرجى رفع صورة واضحة ومضاءة جيداً للهوية</div>
-    </div>
-
-    <div class="form-group">
-        <label>صورة شخصية للعميل (سيلفي مع الهوية)</label>
-        <input type="file" id="selfie_image" accept="image/*">
-        <div class="note">التقاط صورة واضحة للوجه وأنت تحمل الهوية</div>
-    </div>
-
-    <div class="form-group">
-        <label>الغرض من استخدام المنصة</label>
-        <select id="purpose">
-            <option value="الإيداع لمنصة تداول">الإيداع لمنصة تداول</option>
-            <option value="شراء منتجات أو خدمات">شراء منتجات أو خدمات</option>
-            <option value="غرض شخصي">غرض شخصي</option>
-        </select>
-    </div>
-
-    <button class="submit-btn" onclick="submitData()">إرسال البيانات للمراجعة</button>
 </div>
 
 <script>
     let tg = window.Telegram.WebApp;
-    tg.expand(); // فتح النافذة بملء الشاشة تلقائياً داخل تيليجرام
+    tg.expand();
 
-    function submitData() {
+    let formDataCache = {};
+
+    function showReview() {
         let name = document.getElementById("fullname").value.trim();
         let phone = document.getElementById("phone").value.trim();
         let address = document.getElementById("address").value.trim();
@@ -89,22 +109,50 @@
         let purpose = document.getElementById("purpose").value;
 
         if(!name || !phone || !address) {
-            alert("يرجى تعبئة الحقول الأساسية بدقة!");
+            alert("⚠️ يرجى تعبئة كافة حقول المعلومات الأساسية بدقة!");
             return;
         }
 
         if(!idImg || !selfieImg) {
-            alert("يرجى إرفاق صورة الهوية وصورة السيلفي لإتمام التوثيق!");
+            alert("⚠️ يرجى إرفاق صورة الهوية وصورة السيلفي الشخصية لإتمام التوثيق!");
             return;
         }
 
-        // ملاحظة: نظراً لأن بوتات تيليجرام ترسل النصوص عبر الـ WebAppData،
-        // نقوم بإرسال الملخص النصي وبيانات توثيق الهوية، ويمكنك لاحقاً استقبال الصور 
-        // أو حفظها عبر سيرفر خارجي إذا لزم الأمر، أو الاكتفاء بالتحقق المبدئي.
-        let dataString = `• الاسم: ${name}\n• الهاتف: ${phone}\n• العنوان: ${address}\n• نوع الهوية: ${idType}\n• صورة الهوية: تم الإرفاق ✅\n• صورة السيلفي: تم الإرفاق ✅\n• الغرض: ${purpose}`;
+        formDataCache = { name, phone, address, idType, purpose };
 
-        // إرسال البيانات للبوت وإغلاق نافذة الويب المصغرة
+        // عرض الملخص للعميل
+        let summaryHtml = `
+            • <b>الاسم:</b> ${name}<br>` +
+            `• <b>الهاتف:</b> ${phone}<br>` +
+            `• <b>العنوان:</b> ${address}<br>` +
+            `• <b>نوع الهوية:</b> ${idType}<br>` +
+            `• <b>صورة الهوية:</b> تم الإرفاق ✅<br>` +
+            `• <b>الصورة الشخصية:</b> تم الإرفاق ✅<br>` +
+            `• <b>الغرض:</b> ${purpose}
+        `;
+
+        document.getElementById("summary-content").innerHTML = summaryHtml;
+        document.getElementById("form-section").style.display = "none";
+        document.getElementById("review-section").style.display = "block";
+    }
+
+    function backToEdit() {
+        document.getElementById("review-section").style.display = "none";
+        document.getElementById("form-section").style.display = "block";
+    }
+
+    function confirmAndSend() {
+        let dataString = `🛡 **طلب توثيق جديد (KYC):**\n\n` +
+                         `• الاسم: ${formDataCache.name}\n` +
+                         `• الهاتف: ${formDataCache.phone}\n` +
+                         `• العنوان: ${formDataCache.address}\n` +
+                         `• نوع الهوية: ${formDataCache.idType}\n` +
+                         `• صورة الهوية: مرفقة ✅\n` +
+                         `• صورة السيلفي: مرفقة ✅\n` +
+                         `• الغرض: ${formDataCache.purpose}`;
+
         tg.sendData(dataString);
+        alert("✅ تم إرسال طلبك بنجاح! سيتم إبلاغك بالرد من الإدارة قريباً.");
         tg.close();
     }
 </script>
